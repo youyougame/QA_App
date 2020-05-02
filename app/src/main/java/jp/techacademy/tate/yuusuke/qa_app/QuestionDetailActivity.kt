@@ -1,10 +1,13 @@
 package jp.techacademy.tate.yuusuke.qa_app
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.widget.Button
 import android.widget.ListView
 
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +18,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_question_detail.*
+import kotlinx.android.synthetic.main.activity_question_send.*
 
 import java.util.HashMap
 
@@ -23,6 +27,10 @@ class QuestionDetailActivity : AppCompatActivity() {
     private lateinit var mQuestion: Question
     private lateinit var mAdapter: QuestionDetailListAdapter
     private lateinit var mAnswerRef: DatabaseReference
+    private lateinit var mAuth: FirebaseAuth
+    private var mFavorite = "notFavorite"
+    private var mFavoriteRef: DatabaseReference? = null
+    private lateinit var mDatabaseReference: DatabaseReference
 
     private val mEventListener = object : ChildEventListener {
         override fun onChildAdded(dataSnapshot: DataSnapshot, s: String?) {
@@ -97,5 +105,43 @@ class QuestionDetailActivity : AppCompatActivity() {
         val dataBaseReference = FirebaseDatabase.getInstance().reference
         mAnswerRef = dataBaseReference.child(ContentsPATH).child(mQuestion.genre.toString()).child(mQuestion.questionUid).child(AnswersPATH)
         mAnswerRef.addChildEventListener(mEventListener)
+
+        val favoriteButton = findViewById<FloatingActionButton>(R.id.favoriteFab)
+
+        val favoriteFab = findViewById<FloatingActionButton>(R.id.favoriteFab)
+        favoriteFab.setOnClickListener { view ->
+            mDatabaseReference = FirebaseDatabase.getInstance().reference
+            val userRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid)
+
+            if (mFavorite == "notFavorite") {
+                mFavorite = "Favorite"
+                favoriteButton.setImageResource(R.drawable.favorite_star_yellow)
+                val data = HashMap<String, String>()
+                data["title"] = mQuestion.title
+                data["body"] = mQuestion.body
+                data["name"] = mQuestion.name
+                userRef.setValue(data)
+
+            } else {
+                mFavorite = "notFavorite"
+                favoriteButton.setImageResource(R.drawable.favorite_star_gray)
+                userRef.setValue(null)
+
+            }
+        }
+    }
+
+    @SuppressLint("RestrictedApi")
+    override fun onResume() {
+        super.onResume()
+        val favoriteButton = findViewById<FloatingActionButton>(R.id.favoriteFab)
+
+        val user = FirebaseAuth.getInstance().currentUser
+
+        if (user == null) {
+            favoriteButton.visibility = View.INVISIBLE
+        } else {
+            favoriteButton.visibility = View.VISIBLE
+        }
     }
 }

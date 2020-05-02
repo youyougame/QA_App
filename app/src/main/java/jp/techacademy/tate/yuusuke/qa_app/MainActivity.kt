@@ -1,5 +1,6 @@
 package jp.techacademy.tate.yuusuke.qa_app
 
+import android.content.ClipData
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.FloatingActionButton
@@ -20,7 +21,10 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import android.util.Base64
+import android.view.View
+import android.widget.Button
 import android.widget.ListView
+import kotlinx.android.synthetic.main.activity_question_send.view.*
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -144,6 +148,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
 
+
         // Firebase
         mDatabaseReference = FirebaseDatabase.getInstance().reference
 
@@ -164,11 +169,22 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     override fun onResume() {
         super.onResume()
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        val user = FirebaseAuth.getInstance().currentUser
+        val menu: Menu = navigationView.menu
+        val navFavorite: MenuItem = menu.findItem(R.id.nav_favorite)
+
+        if (user == null) {
+            navFavorite.setVisible(false)
+        } else {
+            navFavorite.setVisible(true)
+        }
 
         // 1：趣味を規定の選択とする
         if (mGenre == 0) {
-            onNavigationItemSelected(navigationView.menu.getItem(0))
+            onNavigationItemSelected(navigationView.menu.getItem(1))
         }
+
+
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -204,6 +220,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         } else if (id == R.id.nav_compter) {
             mToolbar.title = "コンピューター"
             mGenre = 4
+        } else if (id == R.id.nav_favorite) {
+            val intent = Intent(applicationContext, FavoriteActivity::class.java)
+            startActivity(intent)
+            return true
         }
 
         val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
