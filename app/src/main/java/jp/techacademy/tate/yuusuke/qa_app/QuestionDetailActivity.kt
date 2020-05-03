@@ -133,6 +133,7 @@ class QuestionDetailActivity : AppCompatActivity() {
                 data["genre"] = mQuestion.genre.toString()
                 data["questionUid"] = mQuestion.questionUid
                 data["answers"] = mQuestion.answers.toString()
+                Log.d("kotlinbytesNull", mQuestion.imageBytes.toString())
                 data["imageBytes"] = mQuestion.imageBytes.toString()
 
                 userRef.setValue(data)

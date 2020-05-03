@@ -30,31 +30,29 @@ class FavoriteActivity : AppCompatActivity() {
             val uid = map["uid"] ?: ""
             val genre = map["genre"] ?: ""
             val questionUid = map["questionUid"] ?: ""
-            val imageString = map["imageBytes"] ?: ""
-            val bytes =
-                if (imageString.isNotEmpty()) {
-                    Base64.decode(imageString, Base64.DEFAULT)
-                } else {
-                    byteArrayOf()
-                }
+            var imageString = ""
+
             var aBody = ""
             var aName = ""
             var aUid = ""
             var aAnswerUid = map["answers"].toString()
 
-            Log.d("kotlintest", title)
-
-
-            val favorite = Favorite(title, body, name, uid)
-
-            mFavoriteArrayList = ArrayList<Favorite>()
-            mAdapter = FavoritesListAdapter(this@FavoriteActivity)
-            mFavoriteArrayList.add(favorite)
-            mAdapter.notifyDataSetChanged()
 
 
             val user = FirebaseAuth.getInstance().currentUser!!.uid
             mDatabaseReference = FirebaseDatabase.getInstance().reference
+
+            val queImage = mDatabaseReference.child(ContentsPATH).child(genre).child(questionUid)
+            queImage.addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(p0: DataSnapshot) {
+                    val valuetest = dataSnapshot.value
+                    imageString = valuetest.toString()
+                }
+
+                override fun onCancelled(p0: DatabaseError) {
+
+                }
+            })
 
             val ansData = mDatabaseReference.child(ContentsPATH).child(genre).child(questionUid)
                 .child(AnswersPATH)
@@ -76,24 +74,34 @@ class FavoriteActivity : AppCompatActivity() {
                 }
             })
 
+            val bytes =
+                if (imageString.isNotEmpty()) {
+                    Base64.decode(imageString, Base64.DEFAULT)
+                } else {
+                    byteArrayOf()
+                }
+
             val answerArrayList = ArrayList<Answer>()
             val answer = Answer(aBody, aName, aUid, aAnswerUid)
             answerArrayList.add(answer)
 
-
+            val favorite = Favorite(title, body, name, uid)
 
             val question = Question(
                 title, body, name, uid, dataSnapshot.key ?: "",
                 genre.toInt(), bytes, answerArrayList
             )
-            mQuestionArrayList = ArrayList<Question>()
+
+            mFavoriteArrayList.add(favorite)
+
             mQuestionArrayList.add(question)
+            mAdapter.notifyDataSetChanged()
 
 
         }
 
         override fun onChildChanged(dataSnapshot: DataSnapshot, s: String?) {
-
+            
         }
 
         override fun onChildRemoved(p0: DataSnapshot) {
@@ -130,7 +138,9 @@ class FavoriteActivity : AppCompatActivity() {
         val favData = mDatabaseReference.child(FavoritePATH).child(user)
         favData.addChildEventListener(mEventListener)
 
-        mFavoriteArrayList = ArrayList<Favorite>()
+
+
+        mQuestionArrayList = ArrayList<Question>()
 
 
         mListView.setOnItemClickListener { parent, view, position, id ->

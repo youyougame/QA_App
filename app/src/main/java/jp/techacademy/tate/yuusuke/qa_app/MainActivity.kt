@@ -47,12 +47,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             val name = map["name"] ?: ""
             val uid = map["uid"] ?: ""
             val imageString = map["image"] ?: ""
+            Log.d("kotlinimage", imageString)
             val bytes =
                 if (imageString.isNotEmpty()) {
                     Base64.decode(imageString, Base64.DEFAULT)
                 } else {
                     byteArrayOf()
                 }
+
+            Log.d("kotlinbytes", bytes.toString())
 
             val answerArrayList = ArrayList<Answer>()
             val answerMap = map["answers"] as Map<String, String>?
