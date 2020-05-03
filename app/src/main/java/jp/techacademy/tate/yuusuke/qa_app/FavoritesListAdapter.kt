@@ -12,7 +12,7 @@ import android.widget.TextView
 
 class FavoritesListAdapter(context: Context) : BaseAdapter() {
     private var mLayoutInflater: LayoutInflater
-    private var mQuestionArrayList = ArrayList<Question>()
+    private var mQuestionArrayList = ArrayList<Favorite>()
 
     init {
         mLayoutInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -43,14 +43,11 @@ class FavoritesListAdapter(context: Context) : BaseAdapter() {
         val nameText = convertView.findViewById<View>(R.id.favoriteNameTextView) as TextView
         nameText.text = mQuestionArrayList[position].name
 
-        val resText = convertView.findViewById<View>(R.id.favoriteResTextView) as TextView
-        val resNum = mQuestionArrayList[position].answers.size
-        resText.text = resNum.toString()
 
         return convertView
     }
 
-    fun setQuestionArrayList(questionArrayList: ArrayList<Question>) {
+    fun setQuestionArrayList(questionArrayList: ArrayList<Favorite>) {
         mQuestionArrayList = questionArrayList
     }
 }
