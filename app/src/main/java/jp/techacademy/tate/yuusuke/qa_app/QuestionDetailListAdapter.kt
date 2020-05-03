@@ -9,8 +9,10 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ImageView
 import android.widget.TextView
+import com.google.firebase.database.DatabaseReference
 
 class QuestionDetailListAdapter(context: Context, private val mQustion: Question) : BaseAdapter() {
+
     companion object {
         // どのレイアウトを使って表示させるかを判断する定数
         private val TYPE_QUESTION = 0
@@ -77,6 +79,8 @@ class QuestionDetailListAdapter(context: Context, private val mQustion: Question
             val answer = mQustion.answers[position - 1]
             val body = answer.body
             val name = answer.name
+
+
 
             val bodyTextView = convertView.findViewById<View>(R.id.bodyTextView) as TextView
             bodyTextView.text = body

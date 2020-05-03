@@ -17,6 +17,9 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import kotlinx.android.synthetic.main.activity_question_detail.*
 import kotlinx.android.synthetic.main.activity_question_send.*
+import kotlinx.android.synthetic.main.list_answer.*
+import kotlinx.android.synthetic.main.list_answer.bodyTextView
+import kotlinx.android.synthetic.main.list_question_detail.*
 
 import java.util.HashMap
 
@@ -48,6 +51,9 @@ class QuestionDetailActivity : AppCompatActivity() {
             val body = map["body"] ?: ""
             val name = map["name"] ?: ""
             val uid = map["uid"] ?: ""
+            Log.d("kotlintest", name)
+
+
 
             val answer = Answer(body, name, uid, answerUid)
             mQuestion.answers.add(answer)
@@ -75,84 +81,11 @@ class QuestionDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_question_detail)
 
-        val numExtra = intent.extras!!
-        val number = numExtra.get("num")
 
-        if (number == 2) {
-            Log.d("kotlintest", "1通過")
-            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        // 渡ってきたQuestionのオブジェクトを保持する
+        val extras = intent.extras
+        mQuestion = extras.get("question") as Question
 
-            val favExtras = intent.extras
-            Log.d("kotlintest", "2通過")
-            mFavorite = favExtras.get("favorite") as Favorite
-            val dataBaseReference = FirebaseDatabase.getInstance().reference
-            val favoriteRef = dataBaseReference.child(FavoritePATH).child(userId)
-            favoriteRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    Log.d("kotlintest", "3通過")
-                    val map = dataSnapshot.value as Map<String, String>
-                    mGenre = map["genre"]!!.toInt()
-                }
-
-                override fun onCancelled(p0: DatabaseError) {
-
-                }
-            })
-
-
-            val questionRef = dataBaseReference.child(ContentsPATH).child(mGenre.toString()).child(mFavorite.questionUid)
-            Log.d("kotlintest", "4通過")
-            questionRef.addValueEventListener(object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    Log.d("kotlintest", "5通過")
-                    val map = dataSnapshot.value as Map<String, String>
-                    val title = map["title"] ?: ""
-                    val body = map["body"] ?: ""
-                    val name = map["name"] ?: ""
-                    val uid = map["uid"] ?: ""
-                    val imageString = map["image"] ?: ""
-                    val bytes =
-                        if (imageString.isNotEmpty()) {
-                            Base64.decode(imageString, Base64.DEFAULT)
-                        } else {
-                            byteArrayOf()
-                        }
-
-                    val answerArrayList = ArrayList<Answer>()
-                    val answerMap = map["answers"] as Map<String, String>?
-                    if (answerMap != null) {
-                        for (key in answerMap.keys) {
-                            val temp = answerMap[key] as Map<String, String>
-                            val answerBody = temp["body"] ?: ""
-                            val answerName = temp["name"] ?: ""
-                            val answerUid = temp["uid"] ?: ""
-                            val answer = Answer(answerBody, answerName, answerUid, key)
-                            answerArrayList.add(answer)
-                        }
-                    }
-
-                    val question = Question(
-                        title, body, name, uid, dataSnapshot.key ?: "",
-                        mGenre, bytes, answerArrayList
-                    )
-                    Log.d("kotlintest", "Q" + question.toString())
-                    mQuestion = question
-                    mAdapter.notifyDataSetChanged()
-
-                }
-
-                override fun onCancelled(p0: DatabaseError) {
-
-                }
-            })
-        } else {
-
-
-            // 渡ってきたQuestionのオブジェクトを保持する
-            val extras = intent.extras
-            mQuestion = extras.get("question") as Question
-
-        }
 
         title = mQuestion.title
 
@@ -186,7 +119,8 @@ class QuestionDetailActivity : AppCompatActivity() {
         val favoriteFab = findViewById<FloatingActionButton>(R.id.favoriteFab)
         favoriteFab.setOnClickListener { view ->
             mDatabaseReference = FirebaseDatabase.getInstance().reference
-            val userRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid)//.child(mQuestion.genre.toString())
+            val userRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid)
+//            val answerRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid).child(AnswersPATH)
 
             if (checkFavorite == "notFavorite") {
                 checkFavorite = "Favorite"
@@ -198,9 +132,11 @@ class QuestionDetailActivity : AppCompatActivity() {
                 data["uid"] = mQuestion.uid
                 data["genre"] = mQuestion.genre.toString()
                 data["questionUid"] = mQuestion.questionUid
-
+                data["answers"] = mQuestion.answers.toString()
+                data["imageBytes"] = mQuestion.imageBytes.toString()
 
                 userRef.setValue(data)
+
 
             } else {
                 checkFavorite = "notFavorite"
