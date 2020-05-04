@@ -124,7 +124,7 @@ class FavoriteActivity : AppCompatActivity() {
         setContentView(R.layout.activity_favorite)
         title = "お気に入り"
 
-        val user = FirebaseAuth.getInstance().currentUser!!.uid
+//        val user = FirebaseAuth.getInstance().currentUser!!.uid
 
         mFirebase = FirebaseDatabase.getInstance()
 
@@ -135,8 +135,8 @@ class FavoriteActivity : AppCompatActivity() {
         mFavoriteArrayList = ArrayList<Favorite>()
         mAdapter.notifyDataSetChanged()
 
-        val favData = mDatabaseReference.child(FavoritePATH).child(user)
-        favData.addChildEventListener(mEventListener)
+//        val favData = mDatabaseReference.child(FavoritePATH).child(user)
+//        favData.addChildEventListener(mEventListener)
 
 
 
@@ -152,8 +152,22 @@ class FavoriteActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        val user = FirebaseAuth.getInstance().currentUser!!.uid
+
+        val favData = mDatabaseReference.child(FavoritePATH).child(user)
+        favData.addChildEventListener(mEventListener)
+
         mFavoriteArrayList.clear()
         mAdapter.setQuestionArrayList(mFavoriteArrayList)
         mListView.adapter = mAdapter
+
+        mQuestionArrayList = ArrayList<Question>()
+
+
+        mListView.setOnItemClickListener { parent, view, position, id ->
+            val intent = Intent(applicationContext, QuestionDetailActivity::class.java)
+            intent.putExtra("question", mQuestionArrayList[position])
+            startActivity(intent)
+        }
     }
 }
