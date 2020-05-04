@@ -119,7 +119,9 @@ class QuestionDetailActivity : AppCompatActivity() {
         val favoriteFab = findViewById<FloatingActionButton>(R.id.favoriteFab)
         favoriteFab.setOnClickListener { view ->
             mDatabaseReference = FirebaseDatabase.getInstance().reference
-            val userRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid)
+
+            val user = FirebaseAuth.getInstance().currentUser!!.uid
+            val userRef = mDatabaseReference.child(FavoritePATH).child(user).child(mQuestion.questionUid)
 //            val answerRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid).child(AnswersPATH)
 
             if (checkFavorite == "notFavorite") {
@@ -164,7 +166,8 @@ class QuestionDetailActivity : AppCompatActivity() {
         }
 
         mDatabaseReference = FirebaseDatabase.getInstance().reference
-        val userRef = mDatabaseReference.child(FavoritePATH).child(mQuestion.uid).child(mQuestion.questionUid)//.child(mQuestion.genre.toString())
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val userRef = mDatabaseReference.child(FavoritePATH).child(userId).child(mQuestion.questionUid)//.child(mQuestion.genre.toString())
 
         userRef.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
